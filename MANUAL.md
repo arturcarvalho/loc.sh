@@ -26,6 +26,7 @@ curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh -s -
 | 3 | Config | YAML, TOML, INI |
 | 4 | Media / binary | images, audio, video, fonts, archives, pdf |
 | 5 | Lock files | `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Cargo.lock`, `Gemfile.lock`, `poetry.lock`, `composer.lock`, `go.sum` |
+| 6 | Shell scripts | `.sh`, `.bash`, `.zsh`, `.ksh` (cloc languages: Bourne Shell, Bourne Again Shell, Korn Shell, zsh) |
 
 Each prompt defaults to **Yes** — press Enter to exclude, type `n` to keep.
 

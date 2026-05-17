@@ -52,6 +52,7 @@ Categories you can exclude:
   - Config files       (YAML, TOML, INI)
   - Media / binary     (images, audio, video, fonts, archives, pdf)
   - Lock files         (package-lock.json, yarn.lock, Cargo.lock, ...)
+  - Shell scripts      (.sh, .bash, .zsh, .ksh)
 
 Press Enter to accept the default (Yes) for each prompt.
 
@@ -74,6 +75,7 @@ if ask "Exclude JSON?";                         then add_lang "JSON,JSON5"; fi
 if ask "Exclude config files (YAML/TOML/INI)?"; then add_lang "YAML,TOML,INI"; fi
 if ask "Exclude media/binary assets?";          then EXCLUDE_EXTS="png,jpg,jpeg,gif,svg,ico,webp,bmp,tiff,mp4,mov,mp3,wav,ogg,flac,m4a,pdf,woff,woff2,ttf,eot,otf,zip,gz,tar,7z,rar"; fi
 if ask "Exclude lock files?";                   then NOT_MATCH_F='package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock|Gemfile\.lock|poetry\.lock|composer\.lock|go\.sum'; fi
+if ask "Exclude shell scripts?";                then add_lang "Bourne Shell,Bourne Again Shell,Korn Shell,zsh"; fi
 
 # Emit ./loc.sh — first heredoc expands baked-in values, second is literal.
 cat > "$OUT" <<EOF
