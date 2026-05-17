@@ -1,6 +1,6 @@
 #!/bin/sh
 # loc.sh installer — interactively generates ./loc.sh in the current directory.
-# Usage: curl -fsSL https://raw.githubusercontent.com/arturcarvalho/loc.sh/main/install.sh | sh
+# Usage: curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh
 set -eu
 
 OUT="./loc.sh"

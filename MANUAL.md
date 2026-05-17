@@ -3,7 +3,7 @@
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/arturcarvalho/loc.sh/main/install.sh | sh
+curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh
 ```
 
 The installer asks which file categories to exclude, then writes an executable
@@ -14,7 +14,7 @@ exclusions. The installer refuses to overwrite an existing `loc.sh` unless you
 pass `--force`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/arturcarvalho/loc.sh/main/install.sh | sh -s -- --force
+curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh -s -- --force
 ```
 
 ## Exclusion categories (asked at install)

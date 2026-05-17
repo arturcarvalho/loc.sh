@@ -7,7 +7,7 @@ Running `./loc.sh` prints lines of code for the project, via
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/arturcarvalho/loc.sh/main/install.sh | sh
+curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh
 ```
 
 The installer asks which categories to exclude (markdown, JSON, config files,
