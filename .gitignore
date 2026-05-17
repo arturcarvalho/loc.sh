@@ -1,0 +1,2 @@
+# loc.sh is the per-user artifact produced by ./install.sh — not source.
+loc.sh
