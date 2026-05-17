@@ -26,27 +26,24 @@ if [ -e "$OUT" ] && [ "$FORCE" -eq 0 ]; then
   exit 1
 fi
 
-# When piped via `curl | sh`, stdin is the pipe; read prompts from the terminal.
-if [ ! -t 0 ]; then
-  if [ -r /dev/tty ]; then
-    exec </dev/tty
-  else
-    printf "install.sh needs an interactive terminal for prompts.\n" >&2
-    exit 1
-  fi
+# Open fd 3 to the terminal for prompts. Do NOT swap fd 0 — under `curl | sh`
+# fd 0 is the pipe carrying the script and the parser is still streaming it.
+if ! { exec 3<>/dev/tty; } 2>/dev/null; then
+  printf "install.sh needs an interactive terminal for prompts.\n" >&2
+  exit 1
 fi
 
 ask() {
-  printf "%s [Y/n]: " "$1"
+  printf "%s [Y/n]: " "$1" >&3
   REPLY=""
-  read -r REPLY || REPLY=""
+  read -r REPLY <&3 || REPLY=""
   case "$REPLY" in
     n|N|no|NO|No) return 1 ;;
     *) return 0 ;;
   esac
 }
 
-cat <<'INTRO'
+cat >&3 <<'INTRO'
 loc.sh installer — generates ./loc.sh in the current directory.
 
 Categories you can exclude:
