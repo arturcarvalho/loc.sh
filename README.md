@@ -11,8 +11,8 @@ curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh
 ```
 
 The installer asks which categories to exclude (markdown, JSON, config files,
-media/binary, lock files, shell scripts), then writes an executable `loc.sh`
-with those exclusions baked in.
+media/binary, lock files, shell scripts) and lets you pick top-level folders
+to skip, then writes an executable `loc.sh` with those choices baked in.
 
 ## Use
 

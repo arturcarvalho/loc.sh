@@ -30,6 +30,13 @@ curl -fsSL https://github.com/arturcarvalho/loc.sh/raw/main/install.sh | sh -s -
 
 Each prompt defaults to **Yes** — press Enter to exclude, type `n` to keep.
 
+## Top-level folders (asked at install)
+
+After the category prompts, the installer scans the current directory and asks
+y/N for each top-level folder (default **No** — folder is kept). Picked folders
+are baked into `loc.sh` and skipped at run time (anywhere they appear in the
+tree, by basename). `.git` is never listed — it is always excluded.
+
 ## Always excluded
 
 - `loc.sh` itself.

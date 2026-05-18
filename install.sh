@@ -43,10 +43,20 @@ ask() {
   esac
 }
 
+ask_no() {
+  printf "%s [y/N]: " "$1" >&3
+  REPLY=""
+  read -r REPLY <&3 || REPLY=""
+  case "$REPLY" in
+    y|Y|yes|YES|Yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 cat >&3 <<'INTRO'
 loc.sh installer — generates ./loc.sh in the current directory.
 
-Categories you can exclude:
+Categories you can exclude (default = exclude, Enter to confirm):
   - Markdown files     (.md)
   - JSON files         (.json, .json5)
   - Config files       (YAML, TOML, INI)
@@ -54,19 +64,29 @@ Categories you can exclude:
   - Lock files         (package-lock.json, yarn.lock, Cargo.lock, ...)
   - Shell scripts      (.sh, .bash, .zsh, .ksh)
 
-Press Enter to accept the default (Yes) for each prompt.
+After the categories you'll be asked about each top-level folder
+(default = keep).
 
 INTRO
 
 EXCLUDE_LANGS=""
 EXCLUDE_EXTS=""
 NOT_MATCH_F=""
+EXCLUDE_DIRS=""
 
 add_lang() {
   if [ -z "$EXCLUDE_LANGS" ]; then
     EXCLUDE_LANGS="$1"
   else
     EXCLUDE_LANGS="$EXCLUDE_LANGS,$1"
+  fi
+}
+
+add_dir() {
+  if [ -z "$EXCLUDE_DIRS" ]; then
+    EXCLUDE_DIRS="$1"
+  else
+    EXCLUDE_DIRS="$EXCLUDE_DIRS,$1"
   fi
 }
 
@@ -77,6 +97,24 @@ if ask "Exclude media/binary assets?";          then EXCLUDE_EXTS="png,jpg,jpeg,
 if ask "Exclude lock files?";                   then NOT_MATCH_F='package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock|Gemfile\.lock|poetry\.lock|composer\.lock|go\.sum'; fi
 if ask "Exclude shell scripts?";                then add_lang "Bourne Shell,Bourne Again Shell,Korn Shell,zsh"; fi
 
+# Top-level folders: ask y/N per folder (default N — keep). Always-skipped
+# folders (.git) are not listed; the always-skipped non-git noise list is
+# applied automatically at run time.
+LISTED_DIRS=""
+for d in * .*; do
+  [ -d "$d" ] || continue
+  case "$d" in .|..|.git) continue ;; esac
+  LISTED_DIRS="${LISTED_DIRS}${LISTED_DIRS:+ }$d"
+done
+if [ -n "$LISTED_DIRS" ]; then
+  printf "\nTop-level folders (press Enter to keep each):\n" >&3
+  for d in $LISTED_DIRS; do
+    if ask_no "  Exclude $d/?"; then
+      add_dir "$d"
+    fi
+  done
+fi
+
 # Emit ./loc.sh — first heredoc expands baked-in values, second is literal.
 cat > "$OUT" <<EOF
 #!/usr/bin/env bash
@@ -85,6 +123,7 @@ cat > "$OUT" <<EOF
 EXCLUDE_LANGS='${EXCLUDE_LANGS}'
 EXCLUDE_EXTS='${EXCLUDE_EXTS}'
 NOT_MATCH_F='${NOT_MATCH_F}'
+EXCLUDE_DIRS='${EXCLUDE_DIRS}'
 EOF
 
 cat >> "$OUT" <<'EOF'
@@ -108,12 +147,23 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
   # Tracked + untracked-not-ignored files (so uncommitted work is counted but
   # .gitignore is respected). cloc's --not-match-f is ignored under
   # --list-file, so filter via grep instead.
-  exec cloc "${ARGS[@]}" --list-file=<(
-    git ls-files -co --exclude-standard | grep -Ev "(^|/)($SKIP_BASENAMES)\$"
-  )
+  if [ -n "$EXCLUDE_DIRS" ]; then
+    DIR_PATTERN=$(printf '%s' "$EXCLUDE_DIRS" | sed 's/\./\\./g; s/,/|/g')
+    exec cloc "${ARGS[@]}" --list-file=<(
+      git ls-files -co --exclude-standard \
+        | grep -Ev "(^|/)($SKIP_BASENAMES)\$" \
+        | grep -Ev "(^|/)($DIR_PATTERN)/"
+    )
+  else
+    exec cloc "${ARGS[@]}" --list-file=<(
+      git ls-files -co --exclude-standard | grep -Ev "(^|/)($SKIP_BASENAMES)\$"
+    )
+  fi
 else
+  ALL_EXCLUDE_DIRS="node_modules,vendor,dist,build,target,.venv,venv,.next,.nuxt,.cache,coverage,.git"
+  [ -n "$EXCLUDE_DIRS" ] && ALL_EXCLUDE_DIRS="$ALL_EXCLUDE_DIRS,$EXCLUDE_DIRS"
   ARGS+=("--not-match-f=^($SKIP_BASENAMES)$")
-  ARGS+=(--exclude-dir=node_modules,vendor,dist,build,target,.venv,venv,.next,.nuxt,.cache,coverage,.git)
+  ARGS+=("--exclude-dir=$ALL_EXCLUDE_DIRS")
   exec cloc "${ARGS[@]}" .
 fi
 EOF
